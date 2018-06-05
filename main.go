@@ -7,26 +7,39 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
-func NewHandler(s StoryArc) http.Handler {
+func NewHandler(s map[string]StoryArc) http.Handler {
 	return handler{s}
 }
 
 type handler struct {
-	s StoryArc
+	s map[string]StoryArc
 }
 
 func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	story := h.s
-
-	t := template.Must(template.ParseFiles("index.html"))
-	err := t.Execute(w, story)
-
-	if err != nil {
-		log.Fatalf("template execution: %s", err)
+	path := strings.TrimSpace(r.URL.Path)
+	if path == "" || path == "/" {
+		path = "/intro"
 	}
+	// "/intro" => "intro"
+	path = path[1:]
+	//story := h.s[path]
+
+	t := template.Must(template.ParseFiles("index.gohtml"))
+
+	// ["intro"]
+	if chapter, ok := h.s[path]; ok {
+		err := t.Execute(w, chapter)
+		if err != nil {
+			log.Printf("%v", err)
+			http.Error(w, "Something went wrong.", http.StatusInternalServerError)
+		}
+		return
+	}
+	http.Error(w, "Chapter not found", http.StatusNotFound)
+
 }
 
 func main() {
@@ -44,7 +57,7 @@ func main() {
 	}
 	//fmt.Print("Parsed Json file: ", parsedJSON)
 
-	log.Fatal(http.ListenAndServe(":8080", NewHandler(parsedJSON["intro"])))
+	log.Fatal(http.ListenAndServe(":8080", NewHandler(parsedJSON)))
 
 	fmt.Println("Welcome to Choose your Own Adventure!\nAn interactive story where you dictate what happens.\nPress enter to continue.")
 	var temp string
