@@ -27,7 +27,7 @@ func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path = path[1:]
 	//story := h.s[path]
 
-	t := template.Must(template.ParseFiles("index.gohtml"))
+	t := template.Must(template.ParseFiles("index.html"))
 
 	// ["intro"]
 	if chapter, ok := h.s[path]; ok {
