@@ -31,4 +31,3 @@
 
 [metadata.heroku]
   root-package = "github.com/firstimedeveloper/web-create-your-own-adventure"
-  go-version = "1.0.0"
