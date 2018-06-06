@@ -1,1 +1,1 @@
-web: webcyoa
+web: web-create-your-own-adventure

@@ -10,6 +10,31 @@ import (
 	"strings"
 )
 
+func main() {
+	//Read the json file and assign it to content
+	content, err := ioutil.ReadFile("gopher.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	//fmt.Printf("File contents: %s", content)
+
+	parsedJSON := make(map[string]StoryArc)
+	err = json.Unmarshal(content, &parsedJSON)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//fmt.Print("Parsed Json file: ", parsedJSON)
+
+	port := os.Getenv("PORT")
+
+	if port == ":" {
+		log.Fatal("$PORT must be set")
+	}
+
+	log.Fatal(http.ListenAndServe(":"+port, NewHandler(parsedJSON)))
+
+}
+
 func NewHandler(s map[string]StoryArc) http.Handler {
 	return handler{s}
 }
@@ -40,31 +65,6 @@ func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Error(w, "Chapter not found", http.StatusNotFound)
-
-}
-
-func main() {
-	//Read the json file and assign it to content
-	content, err := ioutil.ReadFile("gopher.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	//fmt.Printf("File contents: %s", content)
-
-	parsedJSON := make(map[string]StoryArc)
-	err = json.Unmarshal(content, &parsedJSON)
-	if err != nil {
-		log.Fatal(err)
-	}
-	//fmt.Print("Parsed Json file: ", parsedJSON)
-
-	port := os.Getenv("PORT")
-
-	if port == ":" {
-		log.Fatal("$PORT must be set")
-	}
-
-	log.Fatal(http.ListenAndServe(":"+port, NewHandler(parsedJSON)))
 
 }
 
